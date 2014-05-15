@@ -1,0 +1,298 @@
+'use strict';
+
+module.exports = function(grunt) {
+    var banner = '/*! project:<%= pkg.name %>, version:<%= pkg.version %>, update:<%= grunt.template.today("yyyy-mm-dd HH:MM:ss") %> */',
+        dirs = {
+            app: 'app',
+            dest: 'dest',
+            test: 'test'
+        };
+
+    dirs.app_scripts        = dirs.app          + '/scripts';
+    dirs.app_images         = dirs.app          + '/images';
+    dirs.app_styles         = dirs.app          + '/styles';
+    dirs.app_pages          = dirs.app          + '/pages';
+    dirs.dest_scripts       = dirs.dest         + '/scripts';
+    dirs.dest_scripts_pkg   = dirs.dest_scripts + '/pkg';
+    dirs.dest_scripts_min   = dirs.dest_scripts + '/min';
+    dirs.dest_images        = dirs.dest         + '/images';
+    dirs.dest_styles        = dirs.dest         + '/styles';
+    dirs.dest_styles_pkg    = dirs.dest_styles  + '_pkg';
+    dirs.dest_styles_base64 = dirs.dest_styles  + '_base64';
+    dirs.dest_pages         = dirs.dest         + '/pages';
+    dirs.dest_pages_pkg     = dirs.dest_pages   + '_pkg';
+    dirs.test_scripts       = dirs.test         + '/scripts';
+
+    grunt.initConfig({
+        pkg: grunt.file.readJSON('package.json'),
+
+        connect: {
+            server: {
+                options: {
+                    port: 8008,
+                    base: './'
+                }
+            }
+        },
+
+        jshint: {
+            options: {
+                jshintrc: '.jshintrc'
+            },
+            beforeconcat: ['Gruntfile.js', dirs.app_scripts + '/**/*.js', dirs.test_scripts + '/**/*.js'],
+            afterconcat: [dirs.dest_scripts + '/**/*.js']
+        },
+
+        watch: {
+            scripts: {
+                files: ['Gruntfile.js', dirs.app_scripts + '/**/*.js', dirs.test_scripts + '/**/*.js'],
+                tasks: ['build-js']
+            },
+            styles: {
+                files: [dirs.app_images + '/**', dirs.app_styles + '/**'],
+                tasks: ['build-css']
+            }
+        },
+
+        clean: {
+            dest: [dirs.dest],
+            dest_scripts: [dirs.dest_scripts],
+            dest_scripts_min: [dirs.dest_scripts_min],
+            dest_styles: [dirs.dest_styles],
+            dest_styles_pkg: [dirs.dest_styles_pkg],
+            dest_styles_base64: [dirs.dest_styles_base64],
+            dest_images: [dirs.dest_images],
+            dest_pages: [dirs.dest_pages],
+            dest_pages_pkg: [dirs.dest_pages_pkg],
+            release: [dirs.dest_styles_pkg, dirs.dest_styles_base64, dirs.dest_pages_pkg]
+        },
+
+        concat: {
+            options: {
+                separator: '\n\n',
+                stripBanners: true
+            },
+            main_js: {
+                src: [
+                    dirs.app_scripts + '/main.js'
+                ],
+                dest: dirs.dest_scripts_pkg + '/main.js'
+            }
+        },
+
+        uglify: {
+            options: {
+                banner: banner
+            },
+            main_js: {
+                options: {
+                    sourceMap: true,
+                    sourceMapName: dirs.dest_scripts_min + '/main_js.map'
+                },
+                files: [
+                    {
+                        src: dirs.dest_scripts_pkg + '/main.js',
+                        dest: dirs.dest_scripts_min + '/main.js'
+                    }
+                ]
+            }
+        },
+
+        unicode: {
+            release: {
+                files: [{
+                    expand: true,
+                    cwd: dirs.dest_scripts_min + '/',
+                    src: '**/*.js',
+                    dest: dirs.dest_scripts + '/'
+                }]
+            }
+        },
+
+        less: {
+            options: {
+                compress: false
+            },
+            build: {
+                files: [
+                    {
+                        src: dirs.app_styles + '/base.less',
+                        dest: dirs.dest_styles + '/base.css'
+                    }
+                ]
+            },
+            release: {
+                files: [
+                    {
+                        src: dirs.app_styles + '/base.less',
+                        dest: dirs.dest_styles_pkg + '/base.css'
+                    }
+                ]
+            }
+        },
+
+        cssmin: {
+            release: {
+                options: {
+                    banner: banner
+                },
+                files: [
+                    {
+                        src: dirs.dest_styles_base64 + '/base.css',
+                        dest: dirs.dest_styles + '/base.css'
+                    }
+                ]
+            }
+        },
+
+        base64image: {
+            styles: {
+                styles: dirs.dest_styles_pkg + '/',
+                images: dirs.dest_images + '/',
+                dest: dirs.dest_styles_base64 + '/'
+            },
+            pages: {
+                styles: dirs.dest_pages_pkg + '/',
+                images: dirs.dest_images + '/',
+                dest: dirs.dest_pages + '/'
+            }
+        },
+
+        imagemin: {
+            options: {
+                optimizationLevel: 3
+            },
+            images: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: dirs.app_images + '/',
+                        src: ['**/*.{png,jpg,jpeg,gif,ico}'],
+                        dest: dirs.dest_images + '/'
+                    }
+                ]
+            }
+        },
+
+        copy: {
+            dest_scripts_pkg_to_dest_scripts: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: dirs.dest_scripts_pkg + '/',
+                        src: ['**'],
+                        dest: dirs.dest_scripts + '/'
+                    }
+                ]
+            },
+            scripts_sourcemap_to_dest_scripts: {
+                options: {
+                    process: function(content) {
+                        return content.replace(/(\.\.\/)*pkg\//g, 'pkg/');
+                    }
+                },
+                files: [
+                    {
+                        expand: true,
+                        cwd: dirs.dest_scripts_min + '/',
+                        src: ['**/*.map'],
+                        dest: dirs.dest_scripts + '/'
+                    }
+                ]
+            },
+            app_images_to_dest_images: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: dirs.app_images + '/',
+                        src: ['**/*.{png,jpg,jpeg,gif,ico}'],
+                        dest: dirs.dest_images + '/'
+                    }
+                ]
+            },
+            app_pages_to_dest_pages_pkg: {
+                options: {
+                    process: function(content) {
+                        content = content.replace(/<link\s.*href="((?:[^"]*\/)*)([^"\/]+).less".*\/?>/g, function(g, s1, s2) {
+                            return '<link rel="stylesheet" type="text/css" href="' + s1 + s2 + '.css" />';
+                        });
+                        content = content.replace(/<!--\s*browser\s*less\s*start\s*-->[\s\S]*<!--\s*browser\s*less\s*end\s*-->/g, function(g) {
+                            return '';
+                        });
+                        return content;
+                    }
+                },
+                files: [
+                    {
+                        expand: true,
+                        cwd: dirs.app_pages + '/',
+                        src: ['**/*.{html,shtml,ico}'],
+                        dest: dirs.dest_pages_pkg + '/'
+                    }
+                ]
+            },
+            dest_pages_pkg_to_dest_pages: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: dirs.app_pages_pkg + '/',
+                        src: ['**'],
+                        dest: dirs.dest_pages + '/'
+                    }
+                ]
+            }
+        },
+
+        gitcommit: {
+            dest: {
+                options: {
+                    message: 'release auto commit, project: <%= pkg.name%>, version: <%= pkg.version %>'
+                },
+                files: {
+                    src: ['package.json', 'dest/**']
+                }
+            }
+        },
+
+        gittag: {
+            tag: {
+                options: {
+                    tag: '<%= pkg.version %>',
+                    message: 'release auto tag, project: <%= pkg.name%>, version: <%= pkg.version %>'
+                }
+            }
+        },
+
+        gitpush: {
+            dest: {
+                options: {}
+            },
+            tag: {
+                options: {
+                    tags: true
+                }
+            }
+        }
+    });
+
+    require('load-grunt-tasks')(grunt);
+
+    grunt.registerTask('default', ['jshint:beforeconcat']);
+    grunt.registerTask('server', ['connect:server:keepalive']);
+
+    grunt.registerTask('build-js-base', ['jshint:beforeconcat', 'clean:dest_scripts', 'concat']);
+    grunt.registerTask('build-js', ['build-js-base', 'copy:dest_scripts_pkg_to_dest_scripts']);
+    grunt.registerTask('build-css-base', ['clean:dest_styles', 'clean:dest_images', 'clean:dest_pages', 'copy:app_pages_to_dest_pages_pkg']);
+    grunt.registerTask('build-css', ['build-css-base', 'less:build', 'copy:app_images_to_dest_images', 'copy:dest_pages_pkg_to_dest_pages', 'clean:dest_pages_pkg']);
+    grunt.registerTask('build', ['build-js', 'build-css']);
+
+    // 注意：正常情况下，release命令必须在master下使用。除此之外，一些特殊情况下，允许在分支中使用release。
+    // 参见：http://wiki.m.sohuno.com/pages/viewpage.action?pageId=6226158#Git使用规范
+    grunt.registerTask('release', ['clean:dest', 'clean:release',
+        'build-js-base', 'uglify', 'unicode:release', 'copy:scripts_sourcemap_to_dest_scripts', 'clean:dest_scripts_min',
+        'build-css-base', 'less:release', 'imagemin', 'base64image', 'cssmin:release', 'clean:release']);
+
+    // release-tag命令，完成项目打包，并自动打tag提交到代码仓库
+    grunt.registerTask('release-tag', ['release', 'gitcommit', 'gittag', 'gitpush']);
+
+};
