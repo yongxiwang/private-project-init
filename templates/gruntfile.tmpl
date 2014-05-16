@@ -246,7 +246,7 @@ module.exports = function(grunt) {
         gitcommit: {
             dest: {
                 options: {
-                    message: 'release auto commit, project: <%= pkg.name%>, version: <%= pkg.version %>'
+                    message: 'Release auto commit, project: <%= pkg.name%>, version: <%= pkg.version %>'
                 },
                 files: {
                     src: ['package.json', 'dest/**']
@@ -258,7 +258,7 @@ module.exports = function(grunt) {
             tag: {
                 options: {
                     tag: '<%= pkg.version %>',
-                    message: 'release auto tag, project: <%= pkg.name%>, version: <%= pkg.version %>'
+                    message: 'Release auto tag, project: <%= pkg.name%>, version: <%= pkg.version %>'
                 }
             }
         },
