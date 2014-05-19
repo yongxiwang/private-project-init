@@ -1,7 +1,7 @@
 {
     "name": "private-project-init",
     "description": "快速生成项目目录、页面和模块，提示：私有项目，请勿随意使用。",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "author": {
         "name": "Max Zhang",
         "email": "zhangdaiping@gmail.com",
