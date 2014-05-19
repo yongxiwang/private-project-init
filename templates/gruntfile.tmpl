@@ -5,7 +5,8 @@ module.exports = function(grunt) {
         dirs = {
             app: 'app',
             dest: 'dest',
-            test: 'test'
+            test: 'test',
+            node_modules: 'node_modules'
         };
 
     dirs.app_scripts        = dirs.app          + '/scripts';
@@ -74,6 +75,7 @@ module.exports = function(grunt) {
             },
             main_js: {
                 src: [
+                    dirs.node_modules + '/zepto-browserify/zepto.js',
                     dirs.app_scripts + '/main.js'
                 ],
                 dest: dirs.dest_scripts_pkg + '/main.js'
@@ -116,16 +118,22 @@ module.exports = function(grunt) {
             build: {
                 files: [
                     {
-                        src: dirs.app_styles + '/base.less',
-                        dest: dirs.dest_styles + '/base.css'
+                        src: [
+                            dirs.app_styles + '/base.less',
+                            dirs.app_styles + '/main.less'
+                        ],
+                        dest: dirs.dest_styles + '/main.css'
                     }
                 ]
             },
             release: {
                 files: [
                     {
-                        src: dirs.app_styles + '/base.less',
-                        dest: dirs.dest_styles_pkg + '/base.css'
+                        src: [
+                            dirs.app_styles + '/base.less',
+                            dirs.app_styles + '/main.less'
+                        ],
+                        dest: dirs.dest_styles_pkg + '/main.css'
                     }
                 ]
             }
@@ -138,8 +146,8 @@ module.exports = function(grunt) {
                 },
                 files: [
                     {
-                        src: dirs.dest_styles_base64 + '/base.css',
-                        dest: dirs.dest_styles + '/base.css'
+                        src: dirs.dest_styles_base64 + '/main.css',
+                        dest: dirs.dest_styles + '/main.css'
                     }
                 ]
             }
