@@ -3,6 +3,7 @@
 'use strict';
 
 var commander = require('commander'),
+    path = require('path'),
     info = require('../lib/info'),
     _ = require('lodash');
 
@@ -14,12 +15,8 @@ commander
     .option('--ver [value]', '初始版本号，默认为0.0.1', '0.0.1')
     .parse(process.argv);
 
-if (!commander.project) {
-    info.fatal('缺少必要的参数: -p [项目名]');
-}
-
 _.templateSettings.escape = /{{-([\s\S]+?)}}/g;
 _.templateSettings.evaluate = /{{([\s\S]+?)}}/g;
 _.templateSettings.interpolate = /{{=([\s\S]+?)}}/g;
 
-require('../lib/initialization')(commander.project, commander.ver);
+require('../lib/initialization')(commander.project || path.basename(process.cwd()), commander.ver);
