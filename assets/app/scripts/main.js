@@ -1,3 +1,15 @@
-(function(window) {
+require.config({
+    shim: {
+        zepto: {
+            exports: '$'
+        }
+    },
+    paths: {
+        zepto: '../../node_modules/zepto-mirror/dist/zepto'
+    }
+});
 
-}(window));
+require(['zepto'], function($) {
+    var win = window;
+
+});

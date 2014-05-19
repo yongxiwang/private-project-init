@@ -7,7 +7,10 @@ module.exports = function(grunt) {
             dest: 'dest',
             test: 'test',
             node_modules: 'node_modules'
+            basedir: '../..'
         };
+
+    dirs.nm_dir = dirs.basedir + '/' + dirs.node_modules;
 
     dirs.app_scripts        = dirs.app          + '/scripts';
     dirs.app_images         = dirs.app          + '/images';
@@ -68,6 +71,7 @@ module.exports = function(grunt) {
             release: [dirs.dest_styles_pkg, dirs.dest_styles_base64, dirs.dest_pages_pkg]
         },
 
+        /*
         concat: {
             options: {
                 separator: '\n\n',
@@ -75,10 +79,26 @@ module.exports = function(grunt) {
             },
             main_js: {
                 src: [
-                    dirs.node_modules + '/zepto-browserify/zepto.js',
+                    dirs.node_modules + '/zepto-mirror/dist/zepto.js',
                     dirs.app_scripts + '/main.js'
                 ],
                 dest: dirs.dest_scripts_pkg + '/main.js'
+            }
+        },
+        */
+
+        requirejs: {
+            production: {
+                options: {
+                    baseUrl: 'app/scripts/',
+                    mainConfigFile: 'app/scripts/main.js',
+                    name:'main',
+                    out: 'dest/scripts/pkg/main.js',
+                    optimize: 'none',
+                    paths: {
+                        zepto: dirs.nm_dir + '/zepto-mirror/dist/zepto'
+                    }
+                }
             }
         },
 
@@ -288,7 +308,7 @@ module.exports = function(grunt) {
     grunt.registerTask('default', ['jshint:beforeconcat']);
     grunt.registerTask('server', ['connect:server:keepalive']);
 
-    grunt.registerTask('build-js-base', ['jshint:beforeconcat', 'clean:dest_scripts', 'concat']);
+    grunt.registerTask('build-js-base', ['jshint:beforeconcat', 'clean:dest_scripts', 'requirejs']);
     grunt.registerTask('build-js', ['build-js-base', 'copy:dest_scripts_pkg_to_dest_scripts']);
     grunt.registerTask('build-css-base', ['clean:dest_styles', 'clean:dest_images', 'clean:dest_pages', 'copy:app_pages_to_dest_pages_pkg']);
     grunt.registerTask('build-css', ['build-css-base', 'less:build', 'copy:app_images_to_dest_images', 'copy:dest_pages_pkg_to_dest_pages', 'clean:dest_pages_pkg']);
