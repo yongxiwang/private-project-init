@@ -90,10 +90,10 @@ module.exports = function(grunt) {
         requirejs: {
             concat: {
                 options: {
-                    baseUrl: 'app/scripts/',
-                    mainConfigFile: 'app/scripts/main.js',
-                    name:'main',
-                    out: 'dest/scripts/pkg/main.js',
+                    baseUrl: dirs.app_scripts,
+                    mainConfigFile: dirs.app_scripts + '/main.js',
+                    name: 'main',
+                    out: dirs.dest_scripts_pkg + '/main.js',
                     optimize: 'none',
                     paths: {
                         zepto: dirs.nm_dir + '/zepto-mirror/dist/zepto'
@@ -139,7 +139,6 @@ module.exports = function(grunt) {
                 files: [
                     {
                         src: [
-                            dirs.app_styles + '/base.less',
                             dirs.app_styles + '/main.less'
                         ],
                         dest: dirs.dest_styles + '/main.css'
@@ -150,7 +149,6 @@ module.exports = function(grunt) {
                 files: [
                     {
                         src: [
-                            dirs.app_styles + '/base.less',
                             dirs.app_styles + '/main.less'
                         ],
                         dest: dirs.dest_styles_pkg + '/main.css'
