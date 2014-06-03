@@ -4,9 +4,9 @@ docs目录说明文档
 
 它的基本目录结构可以为一下形式：
 ```
--- docs
-    |-- prd
-    |-- ue
-    |-- psd
-    |-- api
+── docs
+    ├─ PRD
+    ├─ UE
+    ├─ PSD
+    ├─ API
 ```
